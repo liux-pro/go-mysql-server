@@ -202,3 +202,7 @@ func (s *SessionManager) CloseConn(conn *mysql.Conn) {
 	defer s.mu.Unlock()
 	delete(s.sessions, conn.ConnectionID)
 }
+
+func (s *SessionManager) GetSessions() map[uint32]sql.Session {
+	return s.sessions
+}

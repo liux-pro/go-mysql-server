@@ -15,10 +15,9 @@
 package server
 
 import (
-	"time"
-
 	"github.com/dolthub/vitess/go/mysql"
 	"github.com/opentracing/opentracing-go"
+	"time"
 
 	sqle "github.com/dolthub/go-mysql-server"
 )
@@ -96,6 +95,10 @@ func NewServer(cfg Config, e *sqle.Engine, sb SessionBuilder, listener ServerEve
 	vtListnr.RequireSecureTransport = cfg.RequireSecureTransport
 
 	return &Server{Listener: vtListnr, h: handler}, nil
+}
+
+func (s *Server) GetSessions() map[uint32]*managedSession {
+	return s.h.sm.sessions
 }
 
 // Start starts accepting connections on the server.
