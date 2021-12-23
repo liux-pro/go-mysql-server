@@ -133,6 +133,18 @@ func (s *SessionManager) session(conn *mysql.Conn) sql.Session {
 	return s.sessions[conn.ConnectionID].session
 }
 
+func (s *SessionManager) IterSessions(useSession func(sql.Session) error) error {
+	for _, sess := range s.sessions {
+		sqlSession := sess.session
+
+		err := useSession(sqlSession)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // NewContext creates a new context for the session at the given conn.
 func (s *SessionManager) NewContext(conn *mysql.Conn) (*sql.Context, error) {
 	return s.NewContextWithQuery(conn, "")
