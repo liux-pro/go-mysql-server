@@ -16,6 +16,7 @@ package sql
 
 import (
 	"fmt"
+	"io"
 	"math"
 	"strconv"
 	"strings"
@@ -282,6 +283,28 @@ type Partition interface {
 type PartitionIter interface {
 	Closer
 	Next(*Context) (Partition, error)
+}
+
+// PartitionsToPartitionIter creates a PartitionIter that iterates over the given partitions.
+func PartitionsToPartitionIter(partitions ...Partition) PartitionIter {
+	return &slicePartitionIter{partitions: partitions}
+}
+
+type slicePartitionIter struct {
+	partitions []Partition
+	idx        int
+}
+
+func (i *slicePartitionIter) Next(*Context) (Partition, error) {
+	if i.idx >= len(i.partitions) {
+		return nil, io.EOF
+	}
+	i.idx++
+	return i.partitions[i.idx-1], nil
+}
+func (i *slicePartitionIter) Close(*Context) error {
+	i.partitions = nil
+	return nil
 }
 
 // Table represents the backend of a SQL table.
